@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #4a90e2;
+        }
+        .flashcard-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+        .flashcard {
+            width: 200px;
+            height: 120px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .flashcard:hover {
+            transform: scale(1.05);
+        }
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 18px;
+            padding: 10px;
+            backface-visibility: hidden;
+            border-radius: 8px;
+        }
+        .front {
+            background-color: #4a90e2;
+            color: white;
+        }
+        .back {
+            background-color: #f2a541;
+            color: white;
+            transform: rotateY(180deg);
+        }
+        .flashcard.flip .front {
+            transform: rotateY(180deg);
+        }
+        .flashcard.flip .back {
+            transform: rotateY(0deg);
+        }
+        .audio-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Flashcards com Áudio</h1>
+    <div class="flashcard-container">
+        <div class="flashcard" onclick="this.classList.toggle('flip')">
+            <div class="front">Olá (luxemburguês)</div>
+            <div class="back">
+                Moien
+                <button class="audio-btn" onclick="playAudio('audio1')">🔊</button>
+            </div>
+        </div>
+
+        <!-- Adicione mais flashcards conforme necessário -->
+    </div>
+
+    <audio id="audio1" src="moien.mp3"></audio>
+
+    <script>
+        // Função para tocar o áudio
+        function playAudio(id) {
+            const audio = document.getElementById(id);
+            audio.play();
+        }
+
+        // Simulando o algoritmo de repetição
+        let cardHistory = {};
+
+        function studyCard(cardId) {
+            const now = Date.now();
+            if (!cardHistory[cardId]) cardHistory[cardId] = { interval: 1, lastStudied: now };
+
+            const { interval, lastStudied } = cardHistory[cardId];
+            const daysSinceLastStudy = (now - lastStudied) / (1000 * 60 * 60 * 24);
+
+            if (daysSinceLastStudy >= interval) {
+                alert(`Hora de revisar o card ${cardId}!`);
+                cardHistory[cardId].interval *= 2;  // Dobra o intervalo
+                cardHistory[cardId].lastStudied = now;
+            }
+        }
+
+        // Exemplo de uso do algoritmo com o primeiro flashcard
+        setInterval(() => studyCard('audio1'), 60000);  // Chama a cada minuto para testar
+    </script>
+
+</body>
+</html>
