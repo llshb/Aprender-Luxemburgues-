@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashcards</title>
+    <title>Flashcards com Áudio</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,10 +53,7 @@
             backface-visibility: hidden;
             border-radius: 8px;
         }
-        .front {
-            background-color: #4a90e2;
-            color: white;
-        }
+        .front { color: white; }
         .back {
             background-color: #f2a541;
             color: white;
@@ -83,51 +80,75 @@
             justify-content: center;
             cursor: pointer;
         }
+        /* Cores dos flashcards por tipo */
+        .type-saudacao { background-color: #4a90e2; }
+        .type-verbo { background-color: #ff6b6b; }
+        .type-substantivo { background-color: #4caf50; }
     </style>
 </head>
 <body>
 
     <h1>Flashcards com Áudio</h1>
-    <div class="flashcard-container">
-        <div class="flashcard" onclick="this.classList.toggle('flip')">
-            <div class="front">Olá (luxemburguês)</div>
-            <div class="back">
-                Moien
-                <button class="audio-btn" onclick="playAudio('audio1')">🔊</button>
-            </div>
-        </div>
+    <div class="flashcard-container" id="flashcardContainer"></div>
 
-        <!-- Adicione mais flashcards conforme necessário -->
-    </div>
-
-    <audio id="audio1" src="moien.mp3"></audio>
+    <!-- Formulário para adicionar novos flashcards -->
+    <form id="addFlashcardForm">
+        <h2>Adicionar Novo Flashcard</h2>
+        <label for="frontText">Texto da Frente:</label>
+        <input type="text" id="frontText" required><br>
+        
+        <label for="backText">Texto do Verso:</label>
+        <input type="text" id="backText" required><br>
+        
+        <label for="audioSrc">Áudio (Nome do Arquivo):</label>
+        <input type="text" id="audioSrc" placeholder="ex: audio.mp3" required><br>
+        
+        <label for="type">Tipo de Palavra:</label>
+        <select id="type">
+            <option value="saudacao">Saudação</option>
+            <option value="verbo">Verbo</option>
+            <option value="substantivo">Substantivo</option>
+        </select><br><br>
+        
+        <button type="button" onclick="addFlashcard()">Adicionar Flashcard</button>
+    </form>
 
     <script>
-        // Função para tocar o áudio
-        function playAudio(id) {
-            const audio = document.getElementById(id);
+        const flashcardContainer = document.getElementById('flashcardContainer');
+
+        function addFlashcard() {
+            const frontText = document.getElementById('frontText').value;
+            const backText = document.getElementById('backText').value;
+            const audioSrc = document.getElementById('audioSrc').value;
+            const type = document.getElementById('type').value;
+
+            // Criar o flashcard com o conteúdo
+            const flashcard = document.createElement('div');
+            flashcard.classList.add('flashcard', `type-${type}`);
+            flashcard.innerHTML = `
+                <div class="front">${frontText}</div>
+                <div class="back">
+                    ${backText}
+                    <button class="audio-btn" onclick="playAudio('${audioSrc}')">🔊</button>
+                </div>
+            `;
+
+            // Adiciona funcionalidade de virar o cartão
+            flashcard.addEventListener('click', () => flashcard.classList.toggle('flip'));
+
+            // Adiciona o flashcard ao container
+            flashcardContainer.appendChild(flashcard);
+
+            // Limpa o formulário
+            document.getElementById('frontText').value = '';
+            document.getElementById('backText').value = '';
+            document.getElementById('audioSrc').value = '';
+        }
+
+        function playAudio(audioFile) {
+            let audio = new Audio(audioFile);
             audio.play();
         }
-
-        // Simulando o algoritmo de repetição
-        let cardHistory = {};
-
-        function studyCard(cardId) {
-            const now = Date.now();
-            if (!cardHistory[cardId]) cardHistory[cardId] = { interval: 1, lastStudied: now };
-
-            const { interval, lastStudied } = cardHistory[cardId];
-            const daysSinceLastStudy = (now - lastStudied) / (1000 * 60 * 60 * 24);
-
-            if (daysSinceLastStudy >= interval) {
-                alert(`Hora de revisar o card ${cardId}!`);
-                cardHistory[cardId].interval *= 2;  // Dobra o intervalo
-                cardHistory[cardId].lastStudied = now;
-            }
-        }
-
-        // Exemplo de uso do algoritmo com o primeiro flashcard
-        setInterval(() => studyCard('audio1'), 60000);  // Chama a cada minuto para testar
     </script>
 
 </body>
