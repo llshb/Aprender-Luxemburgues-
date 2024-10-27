@@ -115,29 +115,43 @@
 
     <script>
         const flashcardContainer = document.getElementById('flashcardContainer');
+        const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
 
+        // Função para salvar flashcards no localStorage
+        function saveFlashcards() {
+            localStorage.setItem('flashcards', JSON.stringify(flashcards));
+        }
+
+        // Função para renderizar os flashcards na tela
+        function renderFlashcards() {
+            flashcardContainer.innerHTML = ''; // Limpa o container antes de renderizar
+            flashcards.forEach((card, index) => {
+                const flashcard = document.createElement('div');
+                flashcard.classList.add('flashcard', `type-${card.type}`);
+                flashcard.innerHTML = `
+                    <div class="front">${card.frontText}</div>
+                    <div class="back">
+                        ${card.backText}
+                        <button class="audio-btn" onclick="playAudio('${card.audioSrc}')">🔊</button>
+                    </div>
+                `;
+                flashcard.addEventListener('click', () => flashcard.classList.toggle('flip'));
+                flashcardContainer.appendChild(flashcard);
+            });
+        }
+
+        // Função para adicionar um novo flashcard
         function addFlashcard() {
             const frontText = document.getElementById('frontText').value;
             const backText = document.getElementById('backText').value;
             const audioSrc = document.getElementById('audioSrc').value;
             const type = document.getElementById('type').value;
 
-            // Criar o flashcard com o conteúdo
-            const flashcard = document.createElement('div');
-            flashcard.classList.add('flashcard', `type-${type}`);
-            flashcard.innerHTML = `
-                <div class="front">${frontText}</div>
-                <div class="back">
-                    ${backText}
-                    <button class="audio-btn" onclick="playAudio('${audioSrc}')">🔊</button>
-                </div>
-            `;
+            const newFlashcard = { frontText, backText, audioSrc, type };
+            flashcards.push(newFlashcard);
 
-            // Adiciona funcionalidade de virar o cartão
-            flashcard.addEventListener('click', () => flashcard.classList.toggle('flip'));
-
-            // Adiciona o flashcard ao container
-            flashcardContainer.appendChild(flashcard);
+            saveFlashcards(); // Salva os flashcards no localStorage
+            renderFlashcards(); // Renderiza os flashcards na tela
 
             // Limpa o formulário
             document.getElementById('frontText').value = '';
@@ -145,10 +159,14 @@
             document.getElementById('audioSrc').value = '';
         }
 
+        // Função para tocar o áudio
         function playAudio(audioFile) {
             let audio = new Audio(audioFile);
             audio.play();
         }
+
+        // Carrega os flashcards salvos ao carregar a página
+        window.onload = renderFlashcards;
     </script>
 
 </body>
