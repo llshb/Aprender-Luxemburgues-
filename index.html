@@ -36,6 +36,7 @@
             position: relative;
             overflow: hidden;
             transition: transform 0.3s;
+            text-align: justify;
         }
         .flashcard:hover {
             transform: scale(1.05);
@@ -52,10 +53,10 @@
             padding: 10px;
             backface-visibility: hidden;
             border-radius: 8px;
+            text-align: justify;
         }
         .front { color: white; }
         .back {
-            background-color: #f2a541;
             color: white;
             transform: rotateY(180deg);
         }
@@ -65,10 +66,9 @@
         .flashcard.flip .back {
             transform: rotateY(0deg);
         }
-        .audio-btn {
+        .audio-btn, .edit-btn {
             position: absolute;
             bottom: 10px;
-            right: 10px;
             background-color: #333;
             color: white;
             border: none;
@@ -80,10 +80,15 @@
             justify-content: center;
             cursor: pointer;
         }
+        .audio-btn { right: 10px; }
+        .edit-btn { right: 50px; }
+
         /* Cores dos flashcards por tipo */
         .type-saudacao { background-color: #4a90e2; }
         .type-verbo { background-color: #ff6b6b; }
         .type-substantivo { background-color: #4caf50; }
+        .type-interjeicao { background-color: #ffcc00; }
+        .type-adverbio { background-color: #8e44ad; }
     </style>
 </head>
 <body>
@@ -93,7 +98,7 @@
 
     <!-- Formulário para adicionar novos flashcards -->
     <form id="addFlashcardForm">
-        <h2>Adicionar Novo Flashcard</h2>
+        <h2>Adicionar ou Editar Flashcard</h2>
         <label for="frontText">Texto da Frente:</label>
         <input type="text" id="frontText" required><br>
         
@@ -108,14 +113,17 @@
             <option value="saudacao">Saudação</option>
             <option value="verbo">Verbo</option>
             <option value="substantivo">Substantivo</option>
+            <option value="interjeicao">Interjeição</option>
+            <option value="adverbio">Advérbio</option>
         </select><br><br>
         
-        <button type="button" onclick="addFlashcard()">Adicionar Flashcard</button>
+        <button type="button" onclick="addOrUpdateFlashcard()">Salvar Flashcard</button>
     </form>
 
     <script>
         const flashcardContainer = document.getElementById('flashcardContainer');
         const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+        let editIndex = null; // Índice para edição de flashcards
 
         // Função para salvar flashcards no localStorage
         function saveFlashcards() {
@@ -133,6 +141,7 @@
                     <div class="back">
                         ${card.backText}
                         <button class="audio-btn" onclick="playAudio('${card.audioSrc}')">🔊</button>
+                        <button class="edit-btn" onclick="editFlashcard(${index})">✏️</button>
                     </div>
                 `;
                 flashcard.addEventListener('click', () => flashcard.classList.toggle('flip'));
@@ -140,15 +149,21 @@
             });
         }
 
-        // Função para adicionar um novo flashcard
-        function addFlashcard() {
+        // Função para adicionar ou atualizar um flashcard
+        function addOrUpdateFlashcard() {
             const frontText = document.getElementById('frontText').value;
             const backText = document.getElementById('backText').value;
             const audioSrc = document.getElementById('audioSrc').value;
             const type = document.getElementById('type').value;
 
             const newFlashcard = { frontText, backText, audioSrc, type };
-            flashcards.push(newFlashcard);
+
+            if (editIndex === null) {
+                flashcards.push(newFlashcard); // Adiciona novo flashcard
+            } else {
+                flashcards[editIndex] = newFlashcard; // Atualiza flashcard existente
+                editIndex = null; // Limpa o índice de edição
+            }
 
             saveFlashcards(); // Salva os flashcards no localStorage
             renderFlashcards(); // Renderiza os flashcards na tela
@@ -157,6 +172,16 @@
             document.getElementById('frontText').value = '';
             document.getElementById('backText').value = '';
             document.getElementById('audioSrc').value = '';
+        }
+
+        // Função para editar um flashcard
+        function editFlashcard(index) {
+            const card = flashcards[index];
+            document.getElementById('frontText').value = card.frontText;
+            document.getElementById('backText').value = card.backText;
+            document.getElementById('audioSrc').value = card.audioSrc;
+            document.getElementById('type').value = card.type;
+            editIndex = index; // Define o índice para atualização
         }
 
         // Função para tocar o áudio
