@@ -29,36 +29,35 @@
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             cursor: pointer;
             position: relative;
             overflow: hidden;
             transition: transform 0.3s;
+            text-align: center;
             padding: 10px;
-            text-align: justify;
-            word-wrap: break-word;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            word-wrap: break-word;
         }
         .flashcard:hover {
             transform: scale(1.05);
         }
         .front, .back {
+            position: absolute;
             width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
             color: #333;
             font-size: 18px;
             padding: 10px;
             backface-visibility: hidden;
             border-radius: 8px;
-            text-align: justify;
             word-wrap: break-word;
-            display: flex;
-            flex-direction: column;
+            text-align: center;
         }
         .front {
             color: white;
