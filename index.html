@@ -1,204 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashcards com Áudio</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f4f8;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        h1 {
-            color: #4a90e2;
-        }
-        .flashcard-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            max-width: 800px;
-            margin-top: 20px;
-        }
-        .flashcard {
-            width: 200px;
-            min-height: 120px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s;
-            text-align: center;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            word-wrap: break-word;
-        }
-        .flashcard:hover {
-            transform: scale(1.05);
-        }
-        .front, .back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #333;
-            font-size: 18px;
-            padding: 10px;
-            backface-visibility: hidden;
-            border-radius: 8px;
-            word-wrap: break-word;
-            text-align: center;
-        }
-        .front {
-            color: white;
-        }
-        .back {
-            color: white;
-            transform: rotateY(180deg);
-        }
-        .flashcard.flip .front {
-            transform: rotateY(180deg);
-        }
-        .flashcard.flip .back {
-            transform: rotateY(0deg);
-        }
-        .audio-btn, .edit-btn {
-            position: absolute;
-            bottom: 10px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .audio-btn { right: 10px; }
-        .edit-btn { right: 50px; }
-
-        /* Cores dos flashcards por tipo */
-        .type-saudacao { background-color: #4a90e2; }
-        .type-verbo { background-color: #ff6b6b; }
-        .type-substantivo { background-color: #4caf50; }
-        .type-interjeicao { background-color: #ffcc00; }
-        .type-adverbio { background-color: #8e44ad; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plataforma 3D</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+  <script>
+    // Configuração Básica
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
 
-    <h1>Flashcards com Áudio</h1>
-    <div class="flashcard-container" id="flashcardContainer"></div>
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    <!-- Formulário para adicionar novos flashcards -->
-    <form id="addFlashcardForm">
-        <h2>Adicionar ou Editar Flashcard</h2>
-        <label for="frontText">Texto da Frente:</label>
-        <input type="text" id="frontText" required><br>
-        
-        <label for="backText">Texto do Verso:</label>
-        <input type="text" id="backText" required><br>
-        
-        <label for="audioSrc">Áudio (Nome do Arquivo):</label>
-        <input type="text" id="audioSrc" placeholder="ex: audio.mp3" required><br>
-        
-        <label for="type">Tipo de Palavra:</label>
-        <select id="type">
-            <option value="saudacao">Saudação</option>
-            <option value="verbo">Verbo</option>
-            <option value="substantivo">Substantivo</option>
-            <option value="interjeicao">Interjeição</option>
-            <option value="adverbio">Advérbio</option>
-        </select><br><br>
-        
-        <button type="button" onclick="addOrUpdateFlashcard()">Salvar Flashcard</button>
-    </form>
+    // Iluminação
+    const light = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(light);
 
-    <script>
-        const flashcardContainer = document.getElementById('flashcardContainer');
-        const flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
-        let editIndex = null; // Índice para edição de flashcards
+    const pointLight = new THREE.PointLight(0xffffff, 0.5);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
 
-        // Função para salvar flashcards no localStorage
-        function saveFlashcards() {
-            localStorage.setItem('flashcards', JSON.stringify(flashcards));
-        }
+    // Piso
+    const floorGeometry = new THREE.PlaneGeometry(20, 20);
+    const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = Math.PI / 2;
+    scene.add(floor);
 
-        // Função para renderizar os flashcards na tela
-        function renderFlashcards() {
-            flashcardContainer.innerHTML = ''; // Limpa o container antes de renderizar
-            flashcards.forEach((card, index) => {
-                const flashcard = document.createElement('div');
-                flashcard.classList.add('flashcard', `type-${card.type}`);
-                flashcard.innerHTML = `
-                    <div class="front">${card.frontText}</div>
-                    <div class="back">
-                        ${card.backText}
-                        <button class="audio-btn" onclick="playAudio('${card.audioSrc}')">🔊</button>
-                        <button class="edit-btn" onclick="editFlashcard(${index})">✏️</button>
-                    </div>
-                `;
-                flashcard.addEventListener('click', () => flashcard.classList.toggle('flip'));
-                flashcardContainer.appendChild(flashcard);
-            });
-        }
+    // Exemplo de Objeto
+    const boxGeometry = new THREE.BoxGeometry();
+    const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+    const box = new THREE.Mesh(boxGeometry, boxMaterial);
+    box.position.y = 0.5;
+    scene.add(box);
 
-        // Função para adicionar ou atualizar um flashcard
-        function addOrUpdateFlashcard() {
-            const frontText = document.getElementById('frontText').value;
-            const backText = document.getElementById('backText').value;
-            const audioSrc = document.getElementById('audioSrc').value;
-            const type = document.getElementById('type').value;
+    // Posição da Câmera
+    camera.position.set(0, 5, 10);
+    camera.lookAt(0, 0, 0);
 
-            const newFlashcard = { frontText, backText, audioSrc, type };
+    // Controles Interativos
+    const animate = function () {
+      requestAnimationFrame(animate);
+      box.rotation.x += 0.01;
+      box.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    };
 
-            if (editIndex === null) {
-                flashcards.push(newFlashcard); // Adiciona novo flashcard
-            } else {
-                flashcards[editIndex] = newFlashcard; // Atualiza flashcard existente
-                editIndex = null; // Limpa o índice de edição
-            }
-
-            saveFlashcards(); // Salva os flashcards no localStorage
-            renderFlashcards(); // Renderiza os flashcards na tela
-
-            // Limpa o formulário
-            document.getElementById('frontText').value = '';
-            document.getElementById('backText').value = '';
-            document.getElementById('audioSrc').value = '';
-        }
-
-        // Função para editar um flashcard
-        function editFlashcard(index) {
-            const card = flashcards[index];
-            document.getElementById('frontText').value = card.frontText;
-            document.getElementById('backText').value = card.backText;
-            document.getElementById('audioSrc').value = card.audioSrc;
-            document.getElementById('type').value = card.type;
-            editIndex = index; // Define o índice para atualização
-        }
-
-        // Função para tocar o áudio
-        function playAudio(audioFile) {
-            let audio = new Audio(audioFile);
-            audio.play();
-        }
-
-        // Carrega os flashcards salvos ao carregar a página
-        window.onload = renderFlashcards;
-    </script>
-
+    animate();
+  </script>
 </body>
 </html>
